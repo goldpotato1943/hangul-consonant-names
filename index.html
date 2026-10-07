@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>자음 이름 비밀 규칙</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&family=Noto+Sans+KR:wght@700;900&display=swap">
+<style>
+/* Layout: one full-screen slide at a time (projector-first), top progress bar, big bottom nav. */
+:root{
+  --bg:#EEF4FB; --panel:#FFFFFF; --ink:#16233B; --muted:#5B6B85; --line:#D3DEEC;
+  --cons:#2563EB; --cons-soft:#DCE7FF;      /* 자음 = 파랑 */
+  --vow:#8A97AD;  --vow-soft:#EDF1F6;       /* 모음 ㅣ ㅡ = 회색 */
+  --odd:#F0592A;  --odd-soft:#FFE3D8;       /* 규칙 깨기 = 주황 */
+  --ok:#14965A;   --ok-soft:#D7F5E5;
+  --sun:#FFC83D;
+  --display:"Jua","Noto Sans KR",system-ui,sans-serif;
+  --body:"Gowun Dodum","Noto Sans KR",system-ui,sans-serif;
+  --jamo:"Noto Sans KR",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1726; --panel:#182338; --ink:#EEF3FB; --muted:#9FB0CA; --line:#2A3A57;
+  --cons:#6E9BFF; --cons-soft:#1F3366; --vow:#8F9CB4; --vow-soft:#24314A;
+  --odd:#FF8257; --odd-soft:#4A2418; --ok:#3CCB86; --ok-soft:#143A2A; --sun:#FFD25E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1726; --panel:#182338; --ink:#EEF3FB; --muted:#9FB0CA; --line:#2A3A57;
+  --cons:#6E9BFF; --cons-soft:#1F3366; --vow:#8F9CB4; --vow-soft:#24314A;
+  --odd:#FF8257; --odd-soft:#4A2418; --ok:#3CCB86; --ok-soft:#143A2A; --sun:#FFD25E; color-scheme:dark}
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:clamp(16px,2.2vmin,24px);overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible{outline:4px solid var(--sun);outline-offset:3px}
+.app{height:100%;display:grid;grid-template-rows:auto 1fr auto;padding-inline:16px}
+
+/* top bar */
+.top{display:flex;align-items:center;gap:14px;padding-block:12px}
+.brand{font-family:var(--display);font-size:1.2em;white-space:nowrap}
+.dots{flex:1;display:flex;gap:6px;justify-content:center}
+.dot{width:clamp(10px,2.2vmin,22px);height:clamp(10px,2.2vmin,22px);border-radius:50%;background:var(--line);transition:.25s}
+.dot.on{background:var(--cons);transform:scale(1.25)}
+.tool{padding:6px 12px;border-radius:10px;border:2px solid var(--line);font-family:var(--display);font-size:.85em;white-space:nowrap}
+
+/* slides */
+.stage{position:relative;min-height:0}
+.slide{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:clamp(12px,3vmin,36px);text-align:center;overflow:auto;padding-block:8px}
+.slide[hidden]{display:none!important}
+.slide.enter{animation:in .45s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes in{from{opacity:.0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:none}}
+h1,h2{font-family:var(--display);font-weight:400;margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:clamp(40px,10vmin,128px)}
+h2{font-size:clamp(30px,6.5vmin,80px)}
+.sub{font-size:clamp(18px,3.4vmin,40px);color:var(--muted);margin:0;text-wrap:balance}
+.c{color:var(--cons)} .o{color:var(--odd)} .v{color:var(--vow)}
+
+/* bottom nav */
+.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-block:12px}
+.navbtn{font-family:var(--display);font-size:clamp(20px,3.6vmin,40px);padding:.35em 1.1em;border-radius:999px;background:var(--panel);border:3px solid var(--line)}
+.navbtn.next{background:var(--cons);border-color:var(--cons);color:#fff}
+.navbtn:disabled{opacity:.3;cursor:default}
+.pg{font-family:var(--display);color:var(--muted);font-size:clamp(16px,2.6vmin,28px)}
+
+/* cover */
+.cover-row{display:flex;gap:clamp(8px,2vmin,24px);flex-wrap:wrap;justify-content:center}
+.cover-row span{font-family:var(--jamo);font-weight:900;font-size:clamp(44px,11vmin,140px);width:1.35em;height:1.35em;display:grid;place-items:center;border-radius:.28em;background:var(--panel);border:4px solid var(--line);color:var(--cons);animation:bob 2.4s ease-in-out infinite}
+.cover-row span:nth-child(2){animation-delay:.2s}.cover-row span:nth-child(3){animation-delay:.4s;color:var(--odd);border-color:var(--odd)}
+.cover-row span:nth-child(4){animation-delay:.6s}
+@keyframes bob{50%{transform:translateY(-10px) rotate(-3deg)}}
+
+/* syllable blocks */
+.blk{display:inline-grid;gap:clamp(4px,.8vmin,10px);padding:clamp(6px,1.2vmin,14px);border-radius:18px;background:var(--panel);border:3px dashed var(--line);vertical-align:middle}
+.blk.H{grid-template-columns:auto auto}
+.blk.H .f{grid-column:1 / span 2}
+.blk.V{grid-template-columns:auto}
+.t{font-family:var(--jamo);font-weight:900;font-size:clamp(30px,7.5vmin,96px);min-width:1.2em;height:1.2em;line-height:1;display:grid;place-items:center;border-radius:.2em;padding-inline:.08em}
+.t.cons{background:var(--cons-soft);color:var(--cons)}
+.t.vow{background:var(--vow-soft);color:var(--vow)}
+.t.odd{background:var(--odd-soft);color:var(--odd);box-shadow:0 0 0 4px var(--odd) inset}
+.t.base{background:var(--vow-soft);color:var(--ink)}
+.eq{font-family:var(--display);font-size:clamp(30px,6vmin,80px);color:var(--muted)}
+.syl{font-family:var(--jamo);font-weight:900;font-size:clamp(56px,14vmin,180px);line-height:1}
+.formula{display:flex;align-items:center;justify-content:center;gap:clamp(10px,2.4vmin,30px);flex-wrap:wrap}
+.cap{font-family:var(--display);font-size:clamp(18px,3vmin,34px);margin-top:.3em}
+.pair{display:flex;gap:clamp(18px,5vmin,70px);flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.half{display:flex;flex-direction:column;align-items:center;gap:8px}
+.reveal{transition:opacity .35s, transform .35s}
+.reveal.off{opacity:0;transform:translateY(16px);pointer-events:none}
+
+/* rule slide */
+.rule-cards{display:flex;gap:clamp(12px,3vmin,40px);flex-wrap:wrap;justify-content:center}
+.rcard{background:var(--panel);border:3px solid var(--line);border-radius:24px;padding:clamp(14px,2.6vmin,32px) clamp(18px,3.4vmin,44px);min-width:0}
+.rcard .big{font-family:var(--display);font-size:clamp(32px,7vmin,90px);line-height:1.1}
+.rcard .small{font-size:clamp(16px,2.8vmin,32px);color:var(--muted)}
+.result{font-family:var(--jamo);font-weight:900;font-size:clamp(60px,16vmin,210px);line-height:1;letter-spacing:.04em}
+.stepbtn{font-family:var(--display);font-size:clamp(20px,3.4vmin,38px);padding:.3em 1em;border-radius:999px;background:var(--sun);color:#3A2A00}
+
+/* lab */
+.picker{display:flex;flex-wrap:wrap;gap:clamp(6px,1.2vmin,14px);justify-content:center;max-width:min(1200px,100%)}
+.pk{font-family:var(--jamo);font-weight:900;font-size:clamp(24px,5vmin,60px);width:1.6em;height:1.6em;border-radius:.3em;background:var(--panel);border:3px solid var(--line);color:var(--cons)}
+.pk.odd{color:var(--odd);border-color:var(--odd)}
+.pk.sel{background:var(--cons);color:#fff;border-color:var(--cons);transform:translateY(-4px)}
+.pk.odd.sel{background:var(--odd);border-color:var(--odd)}
+.labmsg{font-family:var(--display);font-size:clamp(20px,3.8vmin,46px);min-height:1.3em}
+.strike{text-decoration:line-through;text-decoration-thickness:.12em;text-decoration-color:var(--odd);color:var(--muted)}
+
+/* grid of 14 */
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:clamp(8px,1.6vmin,18px);width:min(1500px,100%)}
+@media (max-width:760px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:420px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.card{background:var(--panel);border:3px solid var(--line);border-radius:20px;padding:clamp(8px,1.6vmin,18px) 4px;display:flex;flex-direction:column;align-items:center;gap:4px;position:relative}
+.card .j{font-family:var(--jamo);font-weight:900;font-size:clamp(36px,8vmin,100px);line-height:1.1;color:var(--cons)}
+.card .n{font-family:var(--jamo);font-weight:700;font-size:clamp(20px,4vmin,50px);line-height:1.2;transition:.25s}
+.card.odd{border-color:var(--odd);background:var(--odd-soft)}
+.card.odd .j{color:var(--odd)}
+.card .badge{position:absolute;top:-.8em;right:-.4em;background:var(--odd);color:#fff;font-family:var(--display);font-size:clamp(12px,1.8vmin,20px);padding:.15em .6em;border-radius:999px;transform:rotate(6deg)}
+.hidenames .card .n{filter:blur(14px);opacity:.5}
+.hidenames .card.peek .n{filter:none;opacity:1}
+.legend{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;font-family:var(--display);font-size:clamp(16px,2.6vmin,30px)}
+.legend i{display:inline-block;width:1em;height:1em;border-radius:.25em;vertical-align:-.12em;margin-right:.3em;border:3px solid}
+
+/* exceptions */
+.trio{display:flex;gap:clamp(12px,3vmin,40px);flex-wrap:wrap;justify-content:center}
+.ex{background:var(--panel);border:4px solid var(--odd);border-radius:28px;padding:clamp(14px,2.6vmin,30px) clamp(16px,3vmin,40px);display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0}
+.ex .j{font-family:var(--jamo);font-weight:900;font-size:clamp(50px,11vmin,140px);line-height:1;color:var(--odd)}
+.ex .no{font-family:var(--jamo);font-weight:700;font-size:clamp(22px,4.4vmin,56px)}
+.ex .yes{font-family:var(--jamo);font-weight:900;font-size:clamp(40px,9vmin,116px);line-height:1.1}
+.ex .yes b{color:var(--odd)}
+.ex .arrow{font-family:var(--display);font-size:clamp(20px,3.6vmin,44px);color:var(--muted)}
+
+/* chant */
+.chant{font-family:var(--display);font-size:clamp(40px,9vmin,120px);line-height:1.25;text-wrap:balance}
+.chant mark{background:var(--odd-soft);color:var(--odd);padding:0 .12em;border-radius:.18em;box-shadow:0 0 0 4px var(--odd) inset}
+.map{display:flex;gap:clamp(10px,2.4vmin,30px);flex-wrap:wrap;justify-content:center;font-family:var(--display);font-size:clamp(20px,3.6vmin,44px)}
+.map span{background:var(--panel);border:3px solid var(--line);border-radius:999px;padding:.2em .8em}
+.map b{color:var(--odd);font-weight:400}
+.story{max-width:min(980px,100%);background:var(--panel);border:3px solid var(--line);border-radius:22px;padding:clamp(12px,2.2vmin,26px) clamp(16px,3vmin,34px);text-align:left;font-size:clamp(16px,2.6vmin,30px);line-height:1.6}
+.story .hz{font-family:"Noto Sans KR",serif;font-weight:900;color:var(--odd)}
+.story summary{font-family:var(--display);cursor:pointer}
+
+/* quiz */
+.qj{font-family:var(--jamo);font-weight:900;font-size:clamp(90px,24vmin,300px);line-height:1;color:var(--cons);width:1.4em;height:1.4em;display:grid;place-items:center;background:var(--panel);border:5px solid var(--line);border-radius:.22em}
+.opts{display:flex;gap:clamp(10px,2.4vmin,30px);flex-wrap:wrap;justify-content:center}
+.opt{font-family:var(--jamo);font-weight:900;font-size:clamp(34px,7.5vmin,96px);padding:.15em .6em;border-radius:22px;background:var(--panel);border:4px solid var(--line);transition:.2s;min-width:3em}
+.opt:hover:not(:disabled){transform:translateY(-4px);border-color:var(--cons)}
+.opt.right{background:var(--ok-soft);border-color:var(--ok);color:var(--ok)}
+.opt.wrong{background:var(--odd-soft);border-color:var(--odd);color:var(--odd);animation:shake .4s}
+.opt:disabled{cursor:default}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.fb{font-family:var(--display);font-size:clamp(20px,3.8vmin,46px);min-height:2.6em;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px}
+.qbar{display:flex;gap:8px;align-items:center;font-family:var(--display);font-size:clamp(18px,3vmin,34px);color:var(--muted)}
+.qj.word{width:auto;padding-inline:.35em;font-size:clamp(70px,17vmin,210px);color:var(--ink)}
+.stars{font-size:clamp(50px,12vmin,150px);color:var(--sun);letter-spacing:.1em}
+.pill{display:inline-block;background:var(--cons);color:#fff;border-radius:999px;padding:.15em .8em;font-family:var(--display)}
+
+/* discovery */
+.mission{font-family:var(--display);font-size:clamp(16px,2.6vmin,30px);background:var(--sun);color:#3A2A00;padding:.15em .9em;border-radius:999px;transform:rotate(-2deg)}
+.hintline{margin:0;color:var(--muted);font-size:clamp(15px,2.4vmin,28px)}
+.clues{display:flex;gap:clamp(8px,2vmin,24px);flex-wrap:wrap;justify-content:center}
+.clue{background:var(--panel);border:3px solid var(--line);border-radius:22px;padding:clamp(8px,1.6vmin,18px) clamp(12px,2.2vmin,26px);display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;transition:.2s}
+.clue:hover{border-color:var(--cons)}
+.clue .lab{font-family:var(--jamo);font-weight:900;color:var(--cons);font-size:clamp(18px,3vmin,34px)}
+.clue .nm{font-family:var(--jamo);font-weight:900;font-size:clamp(34px,7.5vmin,96px);line-height:1.1}
+.clue .nm .dim{opacity:.25}
+.clue .blk .t{font-size:clamp(18px,3.8vmin,46px)}
+.clue .split{min-height:0}
+.twoblk{display:flex;gap:6px;align-items:flex-start}
+.mcq{display:flex;flex-direction:column;align-items:center;gap:10px}
+.mcq[hidden]{display:none!important}
+.mcq .qq{font-family:var(--display);font-size:clamp(20px,3.6vmin,42px)}
+.mcq .opts .opt{font-size:clamp(24px,4.6vmin,56px);min-width:2.4em}
+.mcq .say{font-family:var(--display);font-size:clamp(18px,3.2vmin,38px);min-height:1.3em}
+.hypo{display:flex;flex-direction:column;gap:clamp(10px,2.4vmin,28px);font-family:var(--display);font-size:clamp(30px,6.4vmin,82px)}
+.hline{display:flex;align-items:center;justify-content:center;gap:.3em;flex-wrap:wrap}
+.blank{font-family:var(--jamo);font-weight:900;min-width:1.6em;padding:0 .3em;border-radius:.2em;border:4px dashed var(--cons);background:var(--cons-soft);color:var(--cons);line-height:1.25}
+.blank.wide{font-family:var(--display);font-weight:400}
+.blank.right{border-style:solid;border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}
+.blank.wrong{border-color:var(--odd);background:var(--odd-soft);color:var(--odd);animation:shake .4s}
+.predrow{display:flex;gap:clamp(16px,4vmin,56px);align-items:center;flex-wrap:wrap;justify-content:center}
+.predcol{display:flex;flex-direction:column;gap:10px;align-items:center}
+.plabel{font-family:var(--display);font-size:clamp(18px,3vmin,34px);color:var(--muted)}
+.predcol .opt{font-size:clamp(30px,6vmin,76px);min-width:2em}
+.opt.sel{border-color:var(--cons);background:var(--cons-soft);color:var(--cons)}
+.ex .pred{font-family:var(--display);color:var(--muted);font-size:clamp(16px,2.6vmin,30px)}
+.ex .yes[hidden]{display:none!important}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">자음 이름 비밀 규칙</div>
+    <div class="dots" id="dots" aria-hidden="true"></div>
+    <button class="tool" id="fsBtn" type="button">전체 화면</button>
+  </header>
+
+  <main class="stage" id="stage">
+    <!-- 1 표지 -->
+    <section class="slide">
+      <div class="cover-row"><span>ㄱ</span><span>ㄴ</span><span>ㄷ</span><span>ㅅ</span></div>
+      <h1>자음 이름에는<br><span class="c">비밀 규칙</span>이 있어요!</h1>
+      <p class="sub">규칙 1개 + 규칙을 깨는 친구 3개만 알면 14개 끝!</p>
+    </section>
+
+    <!-- 2 규칙 단계별 -->
+    <!-- 탐정 1: 숨은 자음 찾기 -->
+    <section class="slide" id="findSlide">
+      <div class="mission">탐정 미션 1</div>
+      <h2>이름 속에 <span class="c">자음</span>이 몇 번 숨어 있을까?</h2>
+      <div class="clues" id="clue1"></div>
+      <button class="stepbtn" id="splitBtn" type="button">쪼개 보기 ▶</button>
+      <div class="labmsg" id="findMsg"></div>
+    </section>
+
+    <!-- 비밀 규칙 -->
+    <section class="slide" id="ruleSlide">
+      <div class="mission">찾았다! 비밀 규칙</div>
+      <div class="rule-cards">
+        <div class="rcard reveal off" data-step="1"><div class="big">앞 글자 = <span class="c">자음</span> + <span class="v">ㅣ</span></div><div class="small">니 · 리 · 미 · 비</div></div>
+        <div class="rcard reveal off" data-step="2"><div class="big">뒤 글자 = <span class="v">으</span> + <span class="c">자음</span> 받침</div><div class="small">은 · 을 · 음 · 읍</div></div>
+      </div>
+      <div class="chant reveal off" data-step="3" style="font-size:clamp(34px,7vmin,90px)">“<span class="v">이</span>~ <span class="v">으</span>~” 하고 불러 보세요!</div>
+      <button class="stepbtn" id="stepBtn" type="button">하나씩 보기 ▶</button>
+    </section>
+
+    <!-- 탐정 4: 예측하기 -->
+    <section class="slide" id="predSlide">
+      <div class="mission">탐정 미션 2</div>
+      <h2>처음 보는 자음도 규칙으로 맞힐 수 있을까?</h2>
+      <div class="predrow">
+        <div class="qj" id="pJ" style="font-size:clamp(60px,15vmin,190px)">ㅈ</div>
+        <div class="predcol">
+          <div class="plabel">① 앞 글자 고르기</div><div class="opts" id="pA"></div>
+          <div class="plabel">② 뒤 글자 고르기</div><div class="opts" id="pB"></div>
+        </div>
+      </div>
+      <div class="labmsg" id="pMsg"></div>
+      <button class="stepbtn" id="pNext" type="button">다른 자음 ▶</button>
+    </section>
+
+    <!-- 탐정 5: 규칙 검사 -->
+    <section class="slide" id="checkSlide">
+      <div class="mission">탐정 미션 3</div>
+      <h2>ㄱ, ㄷ, ㅅ에도 규칙이 맞을까?</h2>
+      <div class="trio" id="trio"></div>
+      <div class="labmsg" id="trioMsg"></div>
+    </section>
+
+    <!-- 4 실험실 -->
+    <section class="slide" id="labSlide">
+      <h2>자음을 눌러 보세요</h2>
+      <div class="picker" id="picker"></div>
+      <div class="pair" id="labOut"></div>
+      <div class="labmsg" id="labMsg"></div>
+    </section>
+
+    <!-- 5 14자 한눈에 -->
+    <section class="slide">
+      <h2>14자 한눈에 보기</h2>
+      <div class="grid" id="grid"></div>
+      <div class="legend">
+        <span><i style="border-color:var(--line);background:var(--panel)"></i>규칙대로 11개</span>
+        <span class="o"><i style="border-color:var(--odd);background:var(--odd-soft)"></i>규칙 깨기 3개</span>
+        <button class="tool" id="hideBtn" type="button">이름 가리기</button>
+      </div>
+    </section>
+
+    <!-- 7 외우는 주문 -->
+    <section class="slide">
+      <h2>3총사 외우는 주문</h2>
+      <div class="chant">“기차<mark>역</mark> <mark>끝</mark>에서<br><mark>옷</mark> 사자!”</div>
+      <div class="map"><span><b>역</b> → 기역</span><span><b>끝(귿)</b> → 디귿</span><span><b>옷</b> → 시옷</span></div>
+      <details class="story">
+        <summary>왜 이 3개만 다를까요? (눌러서 보기)</summary>
+        <p>약 500년 전(1527년) 최세진 선생님이 《훈몽자회》라는 책에 자음 이름을 <b>한자</b>로 적었어요.
+        그런데 ‘윽, 읃, 읏’ 소리가 나는 한자가 없었어요! 그래서 비슷한 한자를 빌려 썼어요.</p>
+        <p><span class="hz">役</span> 부릴 <b>역</b> → 기<b>역</b> &nbsp;·&nbsp; <span class="hz">末</span> <b>끝</b>(옛말 ‘귿’) → 디<b>귿</b> &nbsp;·&nbsp; <span class="hz">衣</span> <b>옷</b> → 시<b>옷</b></p>
+        <p>그 이름이 지금까지 이어져 온 거예요.</p>
+      </details>
+    </section>
+
+    <!-- 8 퀴즈 -->
+    <section class="slide" id="quizSlide">
+      <div class="qbar"><span id="qNum">1 / 25</span> · <span>맞힌 개수 <b class="c" id="qScore">0</b></span></div>
+      <div id="qBody" style="display:flex;flex-direction:column;align-items:center;gap:clamp(12px,3vmin,34px)">
+        <div class="qj" id="qJ">ㄱ</div>
+        <div class="opts" id="qOpts"></div>
+        <div class="fb" id="qFb"></div>
+      </div>
+    </section>
+
+    <!-- 9 마무리 -->
+    <section class="slide">
+      <h2>오늘 배운 것</h2>
+      <div class="rule-cards">
+        <div class="rcard"><div class="big"><span class="c">자음</span>+<span class="v">ㅣ</span> · <span class="v">으</span>+<span class="c">받침</span></div><div class="small">니은 · 리을 · 미음 · 비읍 · 이응 · 지읒 · 치읓 · 키읔 · 티읕 · 피읖 · 히읗</div></div>
+      </div>
+      <div class="rule-cards">
+        <div class="rcard" style="border-color:var(--odd)"><div class="big o">기역 · 디귿 · 시옷</div><div class="small">“기차역 끝에서 옷 사자!”</div></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="nav">
+    <button class="navbtn" id="prev" type="button">◀ 이전</button>
+    <span class="pg" id="pg">1 / 9</span>
+    <button class="navbtn next" id="next" type="button">다음 ▶</button>
+  </footer>
+</div>
+
+<script>
+(() => {
+  // 자음 데이터: 둘째 글자 블록 정보 (i=초성, v=중성, f=받침, L=모양 H가로/V세로)
+  const DATA = [
+    {c:'ㄱ',n:'기역',a:'기',b:'역',odd:true, sec:{i:'ㅇ',v:'ㅕ',f:'ㄱ',L:'H',oddPart:'v'}, rule:'기윽', d:['기윽','기억']},
+    {c:'ㄴ',n:'니은',a:'니',b:'은', d:['니윽','니언']},
+    {c:'ㄷ',n:'디귿',a:'디',b:'귿',odd:true, sec:{i:'ㄱ',v:'ㅡ',f:'ㄷ',L:'V',oddPart:'i'}, rule:'디읃', d:['디읃','디긋']},
+    {c:'ㄹ',n:'리을',a:'리',b:'을', d:['리울','니을']},
+    {c:'ㅁ',n:'미음',a:'미',b:'음', d:['미읍','미응']},
+    {c:'ㅂ',n:'비읍',a:'비',b:'읍', d:['비윽','비음']},
+    {c:'ㅅ',n:'시옷',a:'시',b:'옷',odd:true, sec:{i:'ㅇ',v:'ㅗ',f:'ㅅ',L:'V',oddPart:'v'}, rule:'시읏', d:['시읏','시웃']},
+    {c:'ㅇ',n:'이응',a:'이',b:'응', d:['이윽','이은']},
+    {c:'ㅈ',n:'지읒',a:'지',b:'읒', d:['지읏','지윽']},
+    {c:'ㅊ',n:'치읓',a:'치',b:'읓', d:['치읏','치읒']},
+    {c:'ㅋ',n:'키읔',a:'키',b:'읔', d:['키윽','키역']},
+    {c:'ㅌ',n:'티읕',a:'티',b:'읕', d:['티귿','티읃']},
+    {c:'ㅍ',n:'피읖',a:'피',b:'읖', d:['피읍','피윽']},
+    {c:'ㅎ',n:'히읗',a:'히',b:'읗', d:['히응','히읏']},
+  ];
+
+  // ---------- 슬라이드 내비게이션 ----------
+  const slides = [...document.querySelectorAll('.slide')];
+  const dots = document.getElementById('dots');
+  slides.forEach(() => dots.appendChild(Object.assign(document.createElement('span'),{className:'dot'})));
+  let cur = 0;
+  const prev = document.getElementById('prev'), next = document.getElementById('next'), pg = document.getElementById('pg');
+  function show(i){
+    cur = Math.max(0, Math.min(slides.length-1, i));
+    slides.forEach((s,k) => { s.hidden = k !== cur; s.classList.remove('enter'); });
+    void slides[cur].offsetWidth; slides[cur].classList.add('enter');
+    [...dots.children].forEach((d,k) => d.classList.toggle('on', k===cur));
+    prev.disabled = cur===0; next.disabled = cur===slides.length-1;
+    pg.textContent = (cur+1)+' / '+slides.length;
+    if (slides[cur].id === 'quizSlide' && !quiz.started) startQuiz();
+  }
+  prev.onclick = () => show(cur-1);
+  next.onclick = () => {
+    if (slides[cur].id === 'ruleSlide' && ruleStep < 3) { stepRule(); return; }
+    show(cur+1);
+  };
+  document.addEventListener('keydown', e => {
+    if (e.target.closest && e.target.closest('summary')) return;
+    if (e.key==='ArrowRight' || e.key==='PageDown' || e.key===' ') { e.preventDefault(); next.onclick(); }
+    if (e.key==='ArrowLeft' || e.key==='PageUp') { e.preventDefault(); show(cur-1); }
+    if (slides[cur].id==='quizSlide' && ['1','2','3'].includes(e.key)) {
+      const b = document.querySelectorAll('#qOpts .opt')[+e.key-1]; if (b && !b.disabled) b.click();
+    }
+  });
+  // 스와이프
+  let sx=null;
+  document.getElementById('stage').addEventListener('touchstart', e => sx = e.touches[0].clientX, {passive:true});
+  document.getElementById('stage').addEventListener('touchend', e => {
+    if (sx===null) return; const dx = e.changedTouches[0].clientX - sx; sx=null;
+    if (Math.abs(dx) > 60) dx < 0 ? next.onclick() : show(cur-1);
+  });
+  document.getElementById('fsBtn').onclick = () => {
+    try { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(()=>{}); } catch(_){}
+  };
+
+  // ---------- 규칙 단계별 보기 ----------
+  let ruleStep = 0;
+  const stepBtn = document.getElementById('stepBtn');
+  function stepRule(){
+    ruleStep = ruleStep >= 3 ? 0 : ruleStep + 1;
+    document.querySelectorAll('#ruleSlide .reveal').forEach(el => el.classList.toggle('off', +el.dataset.step > ruleStep));
+    stepBtn.textContent = ruleStep >= 3 ? '다시 보기 ↺' : '하나씩 보기 ▶';
+  }
+  stepBtn.onclick = stepRule;
+
+  // ---------- 블록 그리기 ----------
+  const tile = (ch, cls, extra='') => `<div class="t ${cls} ${extra}">${ch}</div>`;
+  function blockFirst(d){ return `<div class="blk H">${tile(d.c,'cons')}${tile('ㅣ','vow')}</div>`; }
+  function blockSecond(d){
+    if (!d.odd) return `<div class="blk V">${tile('ㅇ','base')}${tile('ㅡ','vow')}${tile(d.c,'cons','f')}</div>`;
+    const s = d.sec;
+    const iC = s.oddPart==='i' ? 'odd' : 'base';
+    const vC = s.oddPart==='v' ? 'odd' : 'vow';
+    return `<div class="blk ${s.L}">${tile(s.i,iC)}${tile(s.v,vC)}${tile(s.f,'cons','f')}</div>`;
+  }
+  function half(blk, syl, cap){
+    return `<div class="half"><div class="formula">${blk}<div class="eq">=</div><div class="syl">${syl}</div></div><div class="cap">${cap}</div></div>`;
+  }
+
+  // ---------- 실험실 ----------
+  const picker = document.getElementById('picker'), labOut = document.getElementById('labOut'), labMsg = document.getElementById('labMsg');
+  DATA.forEach((d,i) => {
+    const b = document.createElement('button');
+    b.type='button'; b.className = 'pk' + (d.odd?' odd':''); b.textContent = d.c;
+    b.setAttribute('aria-label', d.c + ' 이름 보기');
+    b.onclick = () => pick(i);
+    picker.appendChild(b);
+  });
+  function pick(i){
+    const d = DATA[i];
+    [...picker.children].forEach((b,k) => b.classList.toggle('sel', k===i));
+    labOut.innerHTML = half(blockFirst(d), d.a, `${d.c} + <span class="v">ㅣ</span>`) +
+      half(blockSecond(d), d.b, d.odd ? `<span class="o">규칙 깨기!</span>` : `<span class="v">으</span> + ${d.c} 받침`);
+    labOut.classList.remove('enter'); void labOut.offsetWidth;
+    labMsg.innerHTML = d.odd
+      ? `규칙대로면 <span class="strike">${d.rule}</span> → 진짜 이름은 <span class="o">${d.n}</span>!`
+      : `<span class="c">${d.n}</span> — 규칙대로예요!`;
+  }
+  pick(1);
+
+  // ---------- 14자 그리드 ----------
+  const grid = document.getElementById('grid');
+  DATA.forEach((d,i) => {
+    const el = document.createElement('button');
+    el.type='button'; el.className = 'card' + (d.odd?' odd':'');
+    el.innerHTML = `${d.odd?'<span class="badge">규칙 깨기</span>':''}<span class="j">${d.c}</span><span class="n">${d.n}</span>`;
+    el.onclick = () => {
+      if (grid.parentElement.classList.contains('hidenames') && !el.classList.contains('peek')) { el.classList.add('peek'); return; }
+      pick(i); show(slides.indexOf(document.getElementById('labSlide')));
+    };
+    grid.appendChild(el);
+  });
+  const hideBtn = document.getElementById('hideBtn');
+  hideBtn.onclick = () => {
+    const wrap = grid.parentElement, on = !wrap.classList.contains('hidenames');
+    wrap.classList.toggle('hidenames', on);
+    grid.querySelectorAll('.card').forEach(c => c.classList.remove('peek'));
+    hideBtn.textContent = on ? '이름 모두 보기' : '이름 가리기';
+  };
+
+  // ---------- 퀴즈 ----------
+  const quiz = {started:false, list:[], i:0, score:0};
+  const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+  const qBody = document.getElementById('qBody'), qJ = document.getElementById('qJ'), qOpts = document.getElementById('qOpts'),
+        qFb = document.getElementById('qFb'), qNum = document.getElementById('qNum'), qScore = document.getElementById('qScore');
+  function startQuiz(){
+    quiz.started = true; quiz.i = 0; quiz.score = 0;
+    // 25문제: 14자 모두 1번 + 3총사 1번 더 + 나머지 8개 1번 더 (같은 자음이 연달아 나오지 않게)
+    const odds = DATA.filter(d=>d.odd), regs = shuffle(DATA.filter(d=>!d.odd)).slice(0,8);
+    let pool = shuffle([...DATA, ...odds, ...regs]), list = [];
+    while (pool.length){
+      let k = pool.findIndex(d => !list.length || d !== list[list.length-1].d);
+      if (k < 0) k = 0;
+      list.push({d: pool.splice(k,1)[0], type: Math.random() < 0.35 ? 'jamo' : 'name'});
+    }
+    list[0].type = 'name';
+    quiz.list = list;
+    qBody.innerHTML = `<div class="qj" id="qJ"></div><div class="opts" id="qOpts"></div><div class="fb" id="qFb"></div>`;
+    rebind(); ask();
+  }
+  function rebind(){
+    window._q = { qJ:document.getElementById('qJ'), qOpts:document.getElementById('qOpts'), qFb:document.getElementById('qFb') };
+  }
+  function ask(){
+    const {qJ,qOpts,qFb} = window._q, item = quiz.list[quiz.i], d = item.d;
+    qNum.textContent = (quiz.i+1)+' / '+quiz.list.length; qScore.textContent = quiz.score;
+    let ans, opts;
+    if (item.type === 'name'){
+      qJ.textContent = d.c; qJ.classList.remove('word'); ans = d.n; opts = [d.n, ...d.d];
+      qFb.innerHTML = '<span style="color:var(--muted)">이 자음의 이름은?</span>';
+    } else {
+      qJ.textContent = d.n; qJ.classList.add('word'); ans = d.c;
+      opts = [d.c, ...shuffle(DATA.filter(x => x !== d)).slice(0,2).map(x => x.c)];
+      qFb.innerHTML = '<span style="color:var(--muted)">이 이름의 자음은?</span>';
+    }
+    qOpts.innerHTML = '';
+    shuffle(opts).forEach(t => {
+      const b = document.createElement('button'); b.type='button'; b.className='opt'; b.textContent=t;
+      b.onclick = () => answer(b, t===ans, d, ans); qOpts.appendChild(b);
+    });
+  }
+  function answer(btn, ok, d, ans){
+    const {qOpts,qFb} = window._q;
+    qOpts.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (b.textContent===ans) b.classList.add('right'); });
+    if (!ok) btn.classList.add('wrong'); else quiz.score++;
+    qScore.textContent = quiz.score;
+    const why = d.odd ? `<span class="o">${d.c}은 규칙 깨기 3총사! “기차역 끝에서 옷 사자”</span>`
+                      : `<span><span class="c">${d.c}</span>은 규칙대로: ${d.a} + ${d.b}</span>`;
+    qFb.innerHTML = `<span style="color:var(${ok?'--ok':'--odd'})">${ok?'딩동댕!':'아쉬워요! 정답은 '+ans}</span>${why}
+      <button class="stepbtn" type="button" id="qNext">${quiz.i < quiz.list.length-1 ? '다음 문제 ▶' : '결과 보기 ▶'}</button>`;
+    document.getElementById('qNext').onclick = () => { quiz.i++; quiz.i < quiz.list.length ? ask() : finish(); };
+  }
+  function finish(){
+    const n = quiz.list.length, s = quiz.score, stars = s===n?3 : s>=n*0.7?2 : 1;
+    qNum.textContent = '끝!';
+    qBody.innerHTML = `<div class="stars">${'★'.repeat(stars)}<span style="opacity:.2">${'★'.repeat(3-stars)}</span></div>
+      <h2>${n}문제 중 <span class="c">${s}개</span> 맞았어요!</h2>
+      <p class="sub">${s===n?'완벽해요! 자음 이름 박사!':'규칙 깨기 3총사를 한 번 더 떠올려 봐요.'}</p>
+      <button class="stepbtn" type="button" id="qAgain">다시 도전 ↺</button>`;
+    document.getElementById('qAgain').onclick = startQuiz;
+  }
+
+  // ---------- 탐정 미션 ----------
+  const byC = c => DATA.find(d => d.c === c);
+  const CLUE = ['ㄴ','ㄹ','ㅁ','ㅂ'].map(byC);
+
+  // 미션 1: 숨은 자음 찾기
+  const clue1 = document.getElementById('clue1'), splitBtn = document.getElementById('splitBtn'), findMsg = document.getElementById('findMsg');
+  CLUE.forEach(d => {
+    const card = document.createElement('div'); card.className = 'clue';
+    card.innerHTML = `<span class="lab">${d.c}</span><span class="nm">${d.n}</span><span class="split"></span>`;
+    clue1.appendChild(card);
+  });
+  let split = false;
+  splitBtn.onclick = () => {
+    split = !split;
+    clue1.querySelectorAll('.clue').forEach((card,k) => {
+      card.querySelector('.split').innerHTML = split ? `<span class="twoblk">${blockFirst(CLUE[k])}${blockSecond(CLUE[k])}</span>` : '';
+    });
+    findMsg.innerHTML = split ? '파란 자음이 <b class="c">앞에 한 번, 뒤에 한 번!</b> 모두 두 번 숨어 있어요.' : '';
+    splitBtn.textContent = split ? '다시 붙이기 ↺' : '쪼개 보기 ▶';
+  };
+
+  // 한글 조합
+  const CHO='ㄱㄲㄴㄷㄸㄹㅁㅂㅃㅅㅆㅇㅈㅉㅊㅋㅌㅍㅎ', JUNG='ㅏㅐㅑㅒㅓㅔㅕㅖㅗㅘㅙㅚㅛㅜㅝㅞㅟㅠㅡㅢㅣ',
+        JONG=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+  const syl = (i,v,f='') => String.fromCharCode(0xAC00 + (CHO.indexOf(i)*21 + JUNG.indexOf(v))*28 + JONG.indexOf(f));
+
+  // 예측하기
+  const POOL = shuffle(['ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ']); let pi = 0;
+  const pJ = document.getElementById('pJ'), pA = document.getElementById('pA'), pB = document.getElementById('pB'), pMsg = document.getElementById('pMsg');
+  function predict(){
+    const c = POOL[pi % POOL.length], d = byC(c); let gotA = false, gotB = false;
+    pJ.textContent = c; pMsg.innerHTML = '';
+    const optRow = (box, list, ans, done) => {
+      box.innerHTML = '';
+      shuffle(list).forEach(t => {
+        const b = document.createElement('button'); b.type='button'; b.className='opt'; b.textContent=t;
+        b.onclick = () => {
+          if (t === ans){ box.querySelectorAll('.opt').forEach(x=>{x.disabled=true;x.classList.remove('wrong');}); b.classList.add('right'); done(); }
+          else { b.classList.remove('wrong'); void b.offsetWidth; b.classList.add('wrong');
+                 pMsg.innerHTML = '<span class="o">규칙을 떠올려 보세요: 앞은 ㅣ, 뒤는 으 + 받침!</span>'; }
+        };
+        box.appendChild(b);
+      });
+    };
+    const fin = () => { if (gotA && gotB) pMsg.innerHTML = `<span style="color:var(--ok)">정답!</span> ${c}의 이름은 <b class="c">${d.n}</b>. 규칙으로 맞혔어요!`;
+                        else pMsg.innerHTML = ''; };
+    optRow(pA, [syl(c,'ㅏ'), syl(c,'ㅣ'), syl(c,'ㅡ')], d.a, () => { gotA = true; fin(); });
+    const wrongF = c==='ㅇ' ? 'ㄴ' : 'ㅇ';
+    optRow(pB, [syl('ㅇ','ㅏ',c), syl('ㅇ','ㅡ',c), syl('ㅇ','ㅡ',wrongF)], d.b, () => { gotB = true; fin(); });
+  }
+  document.getElementById('pNext').onclick = () => { pi++; predict(); };
+  predict();
+
+  // 규칙 검사 (ㄱ ㄷ ㅅ)
+  const trio = document.getElementById('trio'), trioMsg = document.getElementById('trioMsg'); let opened = 0;
+  DATA.filter(d => d.odd).forEach(d => {
+    const ex = document.createElement('div'); ex.className = 'ex';
+    ex.innerHTML = `<div class="j">${d.c}</div><div class="pred">규칙대로 예측하면</div><div class="no">${d.rule}</div>
+      <button class="stepbtn" type="button">진짜 이름은?</button>
+      <div class="yes" hidden>${d.a}<b>${d.b}</b></div>`;
+    ex.querySelector('button').onclick = e => {
+      e.currentTarget.remove(); ex.querySelector('.no').classList.add('strike'); ex.querySelector('.yes').hidden = false;
+      opened++;
+      trioMsg.innerHTML = opened < 3
+        ? '<span class="o">어? 규칙이 안 맞아요!</span> 다른 것도 확인해 볼까요?'
+        : '<span class="o">규칙을 깨는 3총사 발견!</span> 앞 글자는 규칙대로, <b class="o">뒤 글자만</b> 달라요.';
+    };
+    trio.appendChild(ex);
+  });
+
+  show(0);
+})();
+</script>
+</body>
+</html>
